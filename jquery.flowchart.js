@@ -514,15 +514,43 @@ $(function () {
                 self._createSubConnector(connectorKey, connectorInfos, fullElement);
             }
 
+            function compareConnector(a, b) {
+                if (a.index > b.index) {
+                    return 1;
+                }
+                if (a.index < b.index) {
+                    return -1;
+                }
+                return 0;
+            }
+
             for (var key_i in infos.inputs) {
                 if (infos.inputs.hasOwnProperty(key_i)) {
                     addConnector(key_i, infos.inputs[key_i], $operator_inputs, 'inputs');
                 }
             }
 
+            var hasOutputIndices = false;
+            var ordered_outputs = [];
             for (var key_o in infos.outputs) {
-                if (infos.outputs.hasOwnProperty(key_o)) {
-                    addConnector(key_o, infos.outputs[key_o], $operator_outputs, 'outputs');
+                if (infos.outputs[key_o].hasOwnProperty('index')) {
+                    hasOutputIndices = true;
+                    infos.outputs[key_o]['key'] = key_o
+                    ordered_outputs.push(infos.outputs[key_o]);
+                }
+            }
+            if (hasOutputIndices) {
+                ordered_outputs = ordered_outputs.sort(compareConnector);
+                $.each(ordered_outputs, function(i, oo) {
+                    if (oo.hasOwnProperty('key')) {
+                        addConnector(oo['key'], oo, $operator_outputs, 'outputs');
+                    }
+                });
+            } else {
+                for (var key_o in infos.outputs) {
+                    if (infos.outputs.hasOwnProperty(key_o)) {
+                        addConnector(key_o, infos.outputs[key_o], $operator_outputs, 'outputs');
+                    }
                 }
             }
 
